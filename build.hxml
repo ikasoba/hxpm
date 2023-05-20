@@ -1,0 +1,3 @@
+--class-path src
+--main hxpm.Main
+--cpp haxe-output/

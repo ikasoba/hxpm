@@ -1,0 +1,13 @@
+{
+  "main": "hxpm.Main",
+  "name": "hxpm",
+  "description": "haxe project manager",
+  "classPath": "src",
+  "dependencies": {
+    "hxcpp": "4.3.2"
+  },
+  "contributors": ["ikasoba"],
+  "version": "0.1.0",
+  "releasenote": "",
+  "license": "MIT"
+}
