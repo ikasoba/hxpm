@@ -132,22 +132,7 @@ function init(dir: String) {
 
 /** パッケージをインストールする */
 function install(pkg: String, ?version: Null<String>){
-  var packageVersion = "";
-  if (version == null){
-    var proc = new Process("haxelib", ["info", pkg]);
-    var code = proc.exitCode();
-    if (code != 0){
-      Sys.println(proc.stdout.readAll().toString());
-      Sys.exit(1);
-      return;
-    }
-    var regex = ~/Version: (.+)/;
-    regex.match(proc.stdout.readAll().toString());
-    packageVersion = regex.matched(1);
-  }else{
-    packageVersion = version;
-  }
-  if (Sys.command("haxelib", ["install", pkg, packageVersion]) != 0){
+  if (Sys.command("haxelib", ["install", pkg].concat(version != null ? [version] : [])) != 0){
     Sys.exit(1);
     return;
   }
@@ -159,6 +144,8 @@ function install(pkg: String, ?version: Null<String>){
   if (!haxelib.exists("dependencies")){
     haxelib.set("dependencies", {});
   }
+
+  var packageVersion = version != null ? version : File.getContent(".haxelib/" + pkg + "/.current");
 
   var dependencies: DynamicAccess<Dynamic> = haxelib.get("dependencies");
   dependencies.set(pkg, packageVersion);
