@@ -1,3 +1,4 @@
 --class-path src
 --main hxpm.Main
 --cpp haxe-output/
+-L hscript:2.5.0

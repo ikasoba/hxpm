@@ -41,6 +41,7 @@ class Argparse {
     return this;
   }
 
+  // hoge-command <value> みたいなの
   public function addPositional(name: String, required: Bool = true, ?defaultValue: Null<String>) {
     this.positionalArgs.push({
       name: name,
@@ -58,6 +59,7 @@ class Argparse {
         dest;
       };
     var index = 0;
+
     for (k => v in this.subCommands.keyValueIterator()){
       index = 0;
       if (args[index] == k){
@@ -66,11 +68,15 @@ class Argparse {
       }
       index = 1;
     }
+
+    // サブコマンドが登録してあったけど特にマッチするものがなかった場合
     if (index == 1){
       return ParserResult.Err("Invalid subcommand type.");
     }
+
     var positionalIndex = 0;
     for (item in args){
+      // positional argument のパース(日本語名わからん)
       if (positionalIndex < this.positionalArgs.length && item.charAt(0) != "-"){
         var positional = this.positionalArgs[positionalIndex];
         result.set(positional.name, item);

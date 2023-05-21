@@ -1,13 +1,16 @@
 {
+  "version": "0.1.2",
+  "contributors": [
+    "ikasoba"
+  ],
+  "license": "MIT",
+  "releasenote": "",
+  "dependencies": {
+    "hxcpp": "4.3.2",
+    "hscript": "2.5.0"
+  },
   "main": "hxpm.Main",
   "name": "hxpm",
   "description": "haxe project manager",
-  "classPath": "src",
-  "dependencies": {
-    "hxcpp": "4.3.2"
-  },
-  "contributors": ["ikasoba"],
-  "version": "0.1.1",
-  "releasenote": "",
-  "license": "MIT"
+  "classPath": "src"
 }

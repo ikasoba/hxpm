@@ -1,7 +1,7 @@
 package hxpm;
 
 function ask(prompt: String, required: Bool = false, ?defaultValue: Null<String>){
-  Sys.print(prompt + (defaultValue != null ? "[" + defaultValue + "]: " : ": "));
+  Sys.print(prompt + (defaultValue != null ? "[" + defaultValue + "]: " : "[]: "));
   var ans = Sys.stdin().readLine();
   if (ans == "") {
     if (required){

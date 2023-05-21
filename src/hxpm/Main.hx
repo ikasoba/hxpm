@@ -1,7 +1,10 @@
 package hxpm;
 
+import hxpm.util.Comptime.readJsonFromFile;
+import haxe.Constraints.Function;
+import hxpm.config.Config.loadConfig;
 import hxpm.Hxml.HxmlExpr;
-import hxpm.String.startsWith;
+import hxpm.Util.startsWith;
 import sys.io.Process;
 import haxe.DynamicAccess;
 import haxe.io.Path;
@@ -14,9 +17,10 @@ var help = (
     "Usage:\n"
   + "  hxpm init [<dir>]                        -  initialize project.\n"
   + "  hxpm install [-L] <package> [<version>]  -  install package.\n"
-  + "                                              The L option can be used to add libraries to build.hxml.\n"
+  + "                                              The -L option can be used to add libraries to build.hxml.\n"
   + "  hxpm remove <package>                    -  uninstall package.\n"
-  + "  hxpm install-dep                         -  install project dependencies."
+  + "  hxpm install-dep                         -  install project dependencies.\n"
+  + "  hxpm version                             -  show hxpm version."
 );
 
 function main(){
@@ -45,6 +49,11 @@ function main(){
     new Argparse()
   );
 
+  parser.setSubCommand(
+    "version",
+    new Argparse()
+  );
+
   var result = parser.parse(Sys.args());
   var args: Map<String, String>;
   switch (result){
@@ -60,23 +69,40 @@ function main(){
     };
   }
 
-  if (args.get("subcommand") == "init"){
-    init(args.get("dir"));
-  }else if (args.get("subcommand") == "install"){
-    install(args.get("pkg"), args.get("version"), args.get("L") == "true");
-  }else if (args.get("subcommand") == "remove"){
-    remove(args.get("pkg"));
-  }else if (args.get("subcommand") == "install-dep"){
-    installDep();
+  switch (args.get("subcommand")){
+    case "init": {
+      init(args.get("dir"));
+    };
+
+    case "install": {
+      install(args.get("pkg"), args.get("version"), args.get("L") == "true");
+    };
+
+    case "remove": {
+      remove(args.get("pkg"));
+    };
+
+    case "install-dep": {
+      installDep();
+    };
+
+    case "version": {
+      var haxelib = readJsonFromFile("haxelib.json");
+      Sys.println(haxelib.version);
+    };
   }
 }
 
 /** プロジェクトを初期化する */
 function init(dir: String) {
+
+  var config = loadConfig();
+
   var prevPath = Sys.getCwd();
   if (!FileSystem.exists(dir)){
     FileSystem.createDirectory(dir);
   }
+
   Sys.setCwd(dir);
 
   var projectName = ask("project name", Path.withoutDirectory(Path.removeTrailingSlashes(dir)));
@@ -90,10 +116,6 @@ function init(dir: String) {
     classPath: "src/",
     main: projectIdent + ".Main"
   }
-
-  var branch = ask("git branch name", false);
-
-  Sys.command("git", ["init"].concat(branch != null ? ["-b", branch] : []));
 
   Sys.command("haxelib", ["newrepo"]);
 
@@ -130,6 +152,11 @@ function init(dir: String) {
   );
 
   install("hxcpp");
+
+  if (config.interp.variables.exists("postInit")){
+    var postInit = config.interp.variables.get("postInit");
+    postInit();
+  }
 
   Sys.setCwd(prevPath);
 }
