@@ -1,5 +1,7 @@
 package hxpm;
 
+import hxpm.Hxml.HxmlExpr;
+import hxpm.String.startsWith;
 import sys.io.Process;
 import haxe.DynamicAccess;
 import haxe.io.Path;
@@ -10,10 +12,11 @@ import hxpm.Question.ask;
 
 var help = (
     "Usage:\n"
-  + "  hxpm init [<dir>]                   -  initialize project\n"
-  + "  hxpm install <package> [<version>]  -  install package\n"
-  + "  hxpm remove <package>               -  uninstall package\n"
-  + "  hxpm install-dep                    -  install project dependencies"
+  + "  hxpm init [<dir>]                        -  initialize project.\n"
+  + "  hxpm install [-L] <package> [<version>]  -  install package.\n"
+  + "                                              The L option can be used to add libraries to build.hxml.\n"
+  + "  hxpm remove <package>                    -  uninstall package.\n"
+  + "  hxpm install-dep                         -  install project dependencies."
 );
 
 function main(){
@@ -28,6 +31,7 @@ function main(){
     new Argparse()
       .addPositional("pkg", true)
       .addPositional("version", false)
+      .addSwitch("L", "true", "false")
   );
 
   parser.setSubCommand(
@@ -59,7 +63,7 @@ function main(){
   if (args.get("subcommand") == "init"){
     init(args.get("dir"));
   }else if (args.get("subcommand") == "install"){
-    install(args.get("pkg"), args.get("version"));
+    install(args.get("pkg"), args.get("version"), args.get("L") == "true");
   }else if (args.get("subcommand") == "remove"){
     remove(args.get("pkg"));
   }else if (args.get("subcommand") == "install-dep"){
@@ -131,7 +135,7 @@ function init(dir: String) {
 }
 
 /** パッケージをインストールする */
-function install(pkg: String, ?version: Null<String>){
+function install(pkg: String, ?version: Null<String>, addLib: Bool = false){
   if (Sys.command("haxelib", ["install", pkg].concat(version != null ? [version] : [])) != 0){
     Sys.exit(1);
     return;
@@ -151,6 +155,29 @@ function install(pkg: String, ?version: Null<String>){
   dependencies.set(pkg, packageVersion);
 
   File.saveContent("haxelib.json", Json.stringify(haxelib, null, "  "));
+
+  if (addLib){
+    if (FileSystem.exists("build.hxml")){
+      var hxml = Hxml.parse(File.getContent("build.hxml"));
+      var i = 0;
+
+      while (i < hxml.length){
+        switch (hxml[i]){
+          case Option(name, value): {
+            if (name == "-L" && startsWith(value, pkg)){
+              hxml.splice(i, 1);
+            }
+          }
+
+          default: {};
+        }
+        i++;
+      }
+
+      hxml.push(HxmlExpr.Option("-L", pkg + ":" + packageVersion));
+      File.saveContent("build.hxml", Hxml.stringify(hxml));
+    }
+  }
 }
 
 /** パッケージをアンインストールする */
@@ -172,6 +199,26 @@ function remove(pkg: String){
   dependencies.remove(pkg);
 
   File.saveContent("haxelib.json", Json.stringify(haxelib, null, "  "));
+
+  if (FileSystem.exists("build.hxml")){
+    var hxml = Hxml.parse(File.getContent("build.hxml"));
+    var i = 0;
+
+    while (i < hxml.length){
+      switch (hxml[i]){
+        case Option(name, value): {
+          if (name == "-L" && startsWith(value, pkg)){
+            hxml.splice(i, 1);
+          }
+        }
+
+        default: {};
+      }
+      i++;
+    }
+
+    File.saveContent("build.hxml", Hxml.stringify(hxml));
+  }
 }
 
 /** プロジェクトの依存関係をインストールする */

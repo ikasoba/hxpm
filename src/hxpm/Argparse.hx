@@ -71,7 +71,7 @@ class Argparse {
     }
     var positionalIndex = 0;
     for (item in args){
-      if (positionalIndex < this.positionalArgs.length){
+      if (positionalIndex < this.positionalArgs.length && item.charAt(0) != "-"){
         var positional = this.positionalArgs[positionalIndex];
         result.set(positional.name, item);
         positionalIndex++;
@@ -89,7 +89,7 @@ class Argparse {
           };
 
           case Switch(name, value, _): {
-            if (item == "--" + name){
+            if (item == "--" + name || item == "-" + name){
               result.set(name, value);
             }
           };

@@ -8,10 +8,11 @@ HXPM is a modern, project manager for Haxe.
 
 ```
 Usage:
-  hxpm init [<dir>]                   -  initialize project
-  hxpm install <package> [<version>]  -  install package
-  hxpm remove <package>               -  uninstall package
-  hxpm install-dep                    -  install project dependencies
+  hxpm init [<dir>]                        -  initialize project.
+  hxpm install [-L] <package> [<version>]  -  install package.
+                                              The L option can be used to add libraries to build.hxml.
+  hxpm remove <package>                    -  uninstall package.
+  hxpm install-dep                         -  install project dependencies.
 ```
 
 # Installation
