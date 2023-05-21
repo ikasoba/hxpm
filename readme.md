@@ -24,6 +24,7 @@ git clone https://github.com/ikasoba/hxpm --depth 1 -b latest
 cd hxpm
 
 # build
+haxelib install build.hxml
 haxe build.hxml
 
 # move
